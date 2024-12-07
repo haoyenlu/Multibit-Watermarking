@@ -67,7 +67,7 @@ def main(args):
 
     repetition_processor = RepetitionPenaltyLogitsProcessor(penalty=1.5)
 
-    topK_processor = TopkLogitsProcessor(top_k=args.topk,delta=args.topk_delta)
+    topK_processor = TopkLogitsProcessor(topk=args.topk,delta=args.topk_delta)
 
     minP_processor = MinPLogitsWarper(min_p = 0.25,filter_value = args.topk_delta,min_tokens_to_keep=1000)
 
