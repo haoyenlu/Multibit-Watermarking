@@ -45,9 +45,9 @@ def main():
         device=model.device
     )
 
-    repetition_processor = RepetitionPenaltyLogitsProcessor(penalty=1.5,device=model.device)
+    repetition_processor = RepetitionPenaltyLogitsProcessor(penalty=1.5)
 
-    topk_processor = TopkLogitsProcessor(topk=1000,delta=1,device=model.device)
+    topk_processor = TopkLogitsProcessor(topk=1000,delta=1)
 
     mb_watermark_detector = MultibitWatermarkDetector(
         vocab=list(tokenizer.get_vocab().values()),
