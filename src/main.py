@@ -81,7 +81,7 @@ def main(args):
 
 
 
-    c4 = load_dataset("allenai/c4", "en", split='test',streaming=True)
+    c4 = load_dataset("allenai/c4", "en", split='validation',streaming=True)
 
     cnt = 0
     for prompt in c4:
