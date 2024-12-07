@@ -4,7 +4,7 @@ import random
 
 
 # Load Model
-from transformers import LogitsProcessor,
+from transformers import LogitsProcessor
 
 
 def additive_prf(input_ids: torch.LongTensor, salt_key: int) -> int:

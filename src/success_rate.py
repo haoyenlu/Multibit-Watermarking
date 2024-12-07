@@ -14,8 +14,11 @@ from watermark_detector import MultibitWatermarkDetector
 
 import utils
 import random
+import numpy as np
 
 import torch
+
+from sklearn.metrics import confusion_matrix
 
 BASE_MODEL = "facebook/opt-1.3b"
 
@@ -59,7 +62,7 @@ def main():
     
     c4 = load_dataset("allenai/c4", "en", split='train',streaming=True)
 
-    success_cnt = 0
+    accuracy = []
     total_cnt = 0
 
     for prompt in c4:
@@ -93,7 +96,10 @@ def main():
         score_dict = mb_watermark_detector.detect(output_text, return_scores=False)
         print(score_dict)
 
-        if score_dict['predict_message'] == message_binary:
-            success_cnt += 1
+        tn, fp, fn, tp = confusion_matrix(list(message_binary), score_dict['pred_message'])
+        accuracy.append(tn + tp)
+
         total_cnt += 1
 
+
+    np.save('accuracy.npy',np.array(accuracy))
