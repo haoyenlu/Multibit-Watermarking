@@ -67,7 +67,7 @@ def main(args):
 
     repetition_processor = RepetitionPenaltyLogitsProcessor(penalty=1.5)
 
-    topK_processor = TopkLogitsProcessor(top_k=args.topk,filter_value=args.topk_delta,min_tokens_to_keep=1000)
+    topK_processor = TopkLogitsProcessor(top_k=args.topk,delta=args.topk_delta)
 
     minP_processor = MinPLogitsWarper(min_p = 0.25,filter_value = args.topk_delta,min_tokens_to_keep=1000)
 
@@ -110,8 +110,8 @@ def main(args):
                                 logits_processor=LogitsProcessorList([
                                     min_length_processor, 
                                     repetition_processor, 
-                                    # topK_processor,
-                                    minP_processor,
+                                    topK_processor,
+                                    # minP_processor,
                                     mb_watermark_processor,
 
         ]))
