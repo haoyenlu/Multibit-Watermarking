@@ -233,7 +233,7 @@ class TopkLogitsProcessor(LogitsProcessor):
             topk_mask = self._cal_topk_mask(score, topk_score_indices)
 
             scores[b_idx][topk_mask] += self.delta
-            scores[b_idx][~topk_mask] -= self.deta
+            scores[b_idx][~topk_mask] -= self.delta
 
         return scores
     
