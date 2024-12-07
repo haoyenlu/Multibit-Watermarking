@@ -27,6 +27,7 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL, padding_side="left")
 
     message_length = 4
+
     mb_watermark_processor = MultibitWatermarkLogitsProcessor(
         vocab=list(tokenizer.get_vocab().values()),
         gamma=0.25,
@@ -68,8 +69,7 @@ def main():
     for prompt in c4:
         input_text = prompt['text']
         tokenized_input = tokenizer(input_text, return_tensors='pt').to(model.device)
-        tokenized_input = utils.truncate(tokenized_input, max_length=300)
-
+        tokenized_input = utils.truncate(tokenized_input, max_length=300).to(model.device)
 
         message_decimal = random.getrandbits(message_length)
 
@@ -79,6 +79,7 @@ def main():
         mb_watermark_processor.set_message(message_binary)
         mb_watermark_detector.set_message(message_binary)
         
+        print(tokenized_input)
 
         output_tokens = model.generate(**tokenized_input, max_new_tokens=200, num_beams=2,
                                 logits_processor=LogitsProcessorList([
