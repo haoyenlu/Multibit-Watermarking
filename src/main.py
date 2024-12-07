@@ -69,7 +69,7 @@ def main(args):
 
     topK_processor = TopkLogitsProcessor(top_k=args.topk,filter_value=args.topk_delta,min_tokens_to_keep=1000)
 
-    minP_processor = MinPLogitsWarper(min_p = 0.25,filter_value = args.topk_delta,min_token_to_keep=1000)
+    minP_processor = MinPLogitsWarper(min_p = 0.25,filter_value = args.topk_delta,min_tokens_to_keep=1000)
 
     mb_watermark_detector = MultibitWatermarkDetector(
         vocab=list(tokenizer.get_vocab().values()),
