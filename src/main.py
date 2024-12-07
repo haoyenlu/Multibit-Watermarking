@@ -81,10 +81,14 @@ def main(args):
 
 
 
-    c4 = load_dataset("allenai/c4", "en", split='train',streaming=True)
+    c4 = load_dataset("allenai/c4", "en", split='test',streaming=True)
 
+    cnt = 0
+    for prompt in c4:
+        print(f"Test Sample:{cnt + 1}")
+        cnt += 1
 
-    for prompt in tqdm(c4):
+        
         input_text = prompt['text']
         tokenized_input = tokenizer(input_text, return_tensors='pt').to(model.device)
         tokenized_input = utils.truncate(tokenized_input, max_length=300).to(model.device)
@@ -102,8 +106,8 @@ def main(args):
                                 logits_processor=LogitsProcessorList([
                                     min_length_processor, 
                                     repetition_processor, 
+                                    mb_watermark_processor,
                                     topk_processor,
-                                    mb_watermark_processor
         ]))
 
 
@@ -137,7 +141,7 @@ def main(args):
 
         ppl = utils.compute_perplexity(output_text_without_topk, eval_model, eval_tokenizer)
         without_topk_perplexity.append(ppl)
-        
+
         print("------Without Topk--------")
         print(f"Perplexity:{ppl}")
         print(f"Accuracy:{score_dict['bit_acc']}")
