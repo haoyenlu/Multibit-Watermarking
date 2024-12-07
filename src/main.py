@@ -116,6 +116,7 @@ def main(args):
         ppl = utils.compute_perplexity(output_text_with_topk, eval_model, eval_tokenizer)
         with_topk_perplexity.append(ppl)
 
+        print("------With Topk--------")
         print(f"Perplexity:{ppl}")
         print(f"Accuracy:{score_dict['bit_acc']}")
 
@@ -136,7 +137,8 @@ def main(args):
 
         ppl = utils.compute_perplexity(output_text_without_topk, eval_model, eval_tokenizer)
         without_topk_perplexity.append(ppl)
-
+        
+        print("------Without Topk--------")
         print(f"Perplexity:{ppl}")
         print(f"Accuracy:{score_dict['bit_acc']}")
 
