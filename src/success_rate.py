@@ -79,8 +79,6 @@ def main():
         mb_watermark_processor.set_message(message_binary)
         mb_watermark_detector.set_message(message_binary)
         
-        print(tokenized_input)
-
         output_tokens = model.generate(**tokenized_input, max_new_tokens=200, num_beams=2,
                                 logits_processor=LogitsProcessorList([
                                     min_length_processor, 
@@ -97,7 +95,7 @@ def main():
         score_dict = mb_watermark_detector.detect(output_text, return_scores=False)
         print(score_dict)
 
-        tn, fp, fn, tp = confusion_matrix(list(message_binary), score_dict['pred_message'])
+        tn, fp, fn, tp = confusion_matrix(list(message_binary), list(score_dict['predict_message']))
         accuracy.append(tn + tp)
 
         total_cnt += 1
