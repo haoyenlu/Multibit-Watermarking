@@ -445,8 +445,6 @@ class MultibitWatermarkDetector(WatermarkBase):
         self,
         text: str = None,
         tokenized_text: list[int] = None,
-        window_size: str = None,
-        window_stride: int = None,
         return_prediction: bool = True,
         return_scores: bool = True,
         z_threshold: float = None,
@@ -468,8 +466,7 @@ class MultibitWatermarkDetector(WatermarkBase):
 
             tokenized_text = self.tokenizer(text, return_tensors="pt", add_special_tokens=False)["input_ids"][0].to(self.device)
 
-            # Remove bos-tok
-
+        # Remove bos-tok
         if  tokenized_text[0] == self.tokenizer.bos_token_id:
                 tokenized_text = tokenized_text[1:]
 
@@ -482,7 +479,7 @@ class MultibitWatermarkDetector(WatermarkBase):
         if return_scores:
             output_dict.update(score_dict)
             # score sampled positions
-            gold_position = kwargs['position'][self.context_width - self.self_salt:]
+            gold_position = self.message
             position = score_dict['sampled_positions']
             match_cnt = sum([x == y for x, y in zip(gold_position, position)])
             output_dict.update(dict(position_acc=match_cnt / len(position)))
