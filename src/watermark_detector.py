@@ -6,7 +6,7 @@ from math import sqrt, ceil, floor, log2, log
 import collections
 import random
 
-from src.watermark_processor import WatermarkBase
+from watermark_processor import WatermarkBase
 
 
 from itertools import chain, tee
