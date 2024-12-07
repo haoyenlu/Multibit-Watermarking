@@ -107,8 +107,9 @@ def main(args):
                                 logits_processor=LogitsProcessorList([
                                     min_length_processor, 
                                     repetition_processor, 
-                                    mb_watermark_processor,
                                     topk_processor,
+                                    mb_watermark_processor,
+
         ]))
 
 
