@@ -35,7 +35,7 @@ def main():
         base=2,
         select_green_tokens=True,
         message_length=message_length,
-        device="cuda" if (torch.cuda.is_available()) else "cpu",
+        device=model.device,
     )
 
     
@@ -45,9 +45,9 @@ def main():
         device=model.device
     )
 
-    repetition_processor = RepetitionPenaltyLogitsProcessor(penalty=1.5)
+    repetition_processor = RepetitionPenaltyLogitsProcessor(penalty=1.5,device=model.device)
 
-    topk_processor = TopkLogitsProcessor(topk=1000,delta=1)
+    topk_processor = TopkLogitsProcessor(topk=1000,delta=1,device=model.device)
 
     mb_watermark_detector = MultibitWatermarkDetector(
         vocab=list(tokenizer.get_vocab().values()),
