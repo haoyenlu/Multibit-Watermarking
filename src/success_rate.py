@@ -54,7 +54,7 @@ def main():
         gamma=0.25,
         device="cuda" if (torch.cuda.is_available()) else "cpu",
         tokenizer=tokenizer,
-        z_threshold=1.5,
+        z_threshold=4,
         ignore_repeated_ngrams=False,
         message_length=message_length,
         base=2,
@@ -63,7 +63,7 @@ def main():
     
     c4 = load_dataset("allenai/c4", "en", split='train',streaming=True)
 
-    accuracy = []
+    _dict = []
     total_cnt = 0
 
     for prompt in c4:
@@ -95,13 +95,8 @@ def main():
         score_dict = mb_watermark_detector.detect(output_text, return_scores=False)
         print(score_dict)
 
-        tn, fp, fn, tp = confusion_matrix(list(message_binary), list(score_dict['predict_message'])).ravel()
-        accuracy.append((tn + tp) /(tn + fp + fn + tp))
+        _dict.append(score_dict)
 
-        total_cnt += 1
-
-
-    np.save('accuracy.npy',np.array(accuracy))
 
 
 if __name__ == '__main__':

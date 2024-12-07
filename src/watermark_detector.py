@@ -617,7 +617,8 @@ class MultibitWatermarkDetector(WatermarkBase):
             gold_position = kwargs['position'][self.context_width - self.self_salt:]
             position = score_dict['sampled_positions']
             match_cnt = sum([x == y for x, y in zip(gold_position, position)])
-            output_dict.update(dict(position_acc=match_cnt / len(position)))
+            output_dict['position_acc'] = match_cnt / len(position)
+            # output_dict.update(dict(position_acc=match_cnt / len(position)))
 
         # if passed return_prediction then perform the hypothesis test and return the outcome
         if return_prediction:
