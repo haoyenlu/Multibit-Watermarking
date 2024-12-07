@@ -91,7 +91,7 @@ def main():
         output_text = tokenizer.decode(output_tokens[0][tokenized_input['input_ids'].shape[-1]:], skip_special_tokens=True) # 生成的文本
 
         prefix_and_output_text = tokenizer.decode(output_tokens[0], skip_special_tokens=True)
-
+        print(prefix_and_output_text)
 
         score_dict = mb_watermark_detector.detect(output_text, return_scores=False)
         print(score_dict)
@@ -103,3 +103,7 @@ def main():
 
 
     np.save('accuracy.npy',np.array(accuracy))
+
+
+if __name__ == '__main__':
+    main()

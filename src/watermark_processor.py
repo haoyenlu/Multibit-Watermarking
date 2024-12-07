@@ -67,9 +67,9 @@ class WatermarkBase:
         # Need to have enough context for seed generation
         if input_ids.shape[-1] < self.context_width:
             raise ValueError(f"seeding_scheme requires at least a {self.context_width} token prefix to seed the RNG.")
-
+        print(input_ids)
         # Generate pseudo random key
-        prf_key = additive_prf(input_ids[-self.context_width :], salt_key=self.hash_key)
+        prf_key = additive_prf(input_ids[- self.context_width :], salt_key=self.hash_key)
 
         position_prf_key = prf_key
         self.prf_key = prf_key
