@@ -205,26 +205,17 @@ class RepetitionPenaltyLogitsProcessor(LogitsProcessor):
 
 class TopkLogitsProcessor(LogitsProcessor):
     """Adding bias to topk token"""
-    def __init__(self, topk: float, delta: float = 1):
+    def __init__(self, top_k: int, filter_value: float = -float("Inf"), min_tokens_to_keep: int = 1):
+        if not isinstance(top_k, int) or top_k <= 0:
+            raise ValueError(f"`top_k` has to be a strictly positive integer, but is {top_k}")
 
-        self.topk = topk
-
-        self.delta = delta
-
-    
-    def _get_topk_indices( self, score: torch.Tensor ):
-
-        topk_score_indices = torch.topk(score, self.topk, dim=-1).indices
-
-        return topk_score_indices
+        self.top_k = max(top_k, min_tokens_to_keep)
+        self.filter_value = filter_value
 
     def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor) -> torch.FloatTensor:
-
-        for b_idx , score in enumerate(scores):
-
-            topk_score_indices = self._get_topk_indices(score)
-
-            scores[b_idx][topk_score_indices] += self.delta
-
-        return scores
+        top_k = min(self.top_k, scores.size(-1))  # Safety check
+        # Remove all tokens with a probability less than the last token of the top-k
+        indices_to_remove = scores < torch.topk(scores, top_k)[0][..., -1, None]
+        scores_processed = scores.masked_fill(indices_to_remove, self.filter_value)
+        return scores_processed
     
