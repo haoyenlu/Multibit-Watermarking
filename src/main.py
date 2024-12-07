@@ -89,8 +89,10 @@ def main(args):
     cnt = 100
 
     for prompt in c4:
+        if cnt == 0: break
         print(f"Test Sample:{-cnt + 100 + 1}")
         cnt -= 1
+        
 
         
         input_text = prompt['text']
@@ -119,16 +121,16 @@ def main(args):
 
         output_text_with_topk = tokenizer.decode(output_tokens_with_topK[0][tokenized_input['input_ids'].shape[-1]:], skip_special_tokens=True) # 生成的文本
 
-        score_dict = mb_watermark_detector.detect(output_text_with_topk, return_scores=True)
+        score_dict_with_topk = mb_watermark_detector.detect(output_text_with_topk, return_scores=True)
         
-        with_topk_accuracy.append(score_dict['bit_acc'])
+        with_topk_accuracy.append(score_dict_with_topk['bit_acc'])
 
         ppl = utils.compute_perplexity(output_text_with_topk, eval_model, eval_tokenizer)
         with_topk_perplexity.append(ppl)
 
         print("------With Topk--------")
         print(f"Perplexity:{ppl}")
-        print(f"Accuracy:{score_dict['bit_acc']}")
+        print(f"Accuracy:{score_dict_with_topk['bit_acc']}")
 
         """Without TopK Logit Processor"""
         output_tokens_without_topK = model.generate(**tokenized_input, max_new_tokens=200, num_beams=2,
@@ -141,16 +143,16 @@ def main(args):
 
         output_text_without_topk = tokenizer.decode(output_tokens_without_topK[0][tokenized_input['input_ids'].shape[-1]:], skip_special_tokens=True) # 生成的文本
 
-        score_dict = mb_watermark_detector.detect(output_text_without_topk, return_scores=True)
+        score_dict_without_topk = mb_watermark_detector.detect(output_text_without_topk, return_scores=True)
         
-        without_topk_accuracy.append(score_dict['bit_acc'])
+        without_topk_accuracy.append(score_dict_without_topk['bit_acc'])
 
         ppl = utils.compute_perplexity(output_text_without_topk, eval_model, eval_tokenizer)
         without_topk_perplexity.append(ppl)
 
         print("------Without Topk--------")
         print(f"Perplexity:{ppl}")
-        print(f"Accuracy:{score_dict['bit_acc']}")
+        print(f"Accuracy:{score_dict_without_topk['bit_acc']}")
 
     print(f"Average Perplexity with TopK:{sum(with_topk_perplexity)/len(with_topk_perplexity)}")
     print(f"Average Accuracy with Topk:{sum(with_topk_accuracy)/len(with_topk_accuracy)}")
