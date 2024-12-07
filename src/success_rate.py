@@ -95,8 +95,8 @@ def main():
         score_dict = mb_watermark_detector.detect(output_text, return_scores=False)
         print(score_dict)
 
-        tn, fp, fn, tp = confusion_matrix(list(message_binary), list(score_dict['predict_message']))
-        accuracy.append(tn + tp)
+        tn, fp, fn, tp = confusion_matrix(list(message_binary), list(score_dict['predict_message'])).raevl()
+        accuracy.append((tn + tp) /(tn + fp + fn + tp))
 
         total_cnt += 1
 
