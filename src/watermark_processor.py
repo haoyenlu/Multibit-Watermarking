@@ -67,7 +67,7 @@ class WatermarkBase:
         # Need to have enough context for seed generation
         if input_ids.shape[-1] < self.context_width:
             raise ValueError(f"seeding_scheme requires at least a {self.context_width} token prefix to seed the RNG.")
-        print(input_ids)
+
         # Generate pseudo random key
         prf_key = additive_prf(input_ids[- self.context_width :], salt_key=self.hash_key)
 
@@ -153,6 +153,7 @@ class MultibitWatermarkLogitsProcessor(WatermarkBase, LogitsProcessor):
     def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor) -> torch.FloatTensor:
         """Call with previous context as input_ids, and scores for next token."""
 
+        self.rng = torch.Generator(device=input_ids.device) if self.rng is None else self.rng
 
         for b_idx, input_seq in enumerate(input_ids):
             
@@ -211,9 +212,9 @@ class TopkLogitsProcessor(LogitsProcessor):
         self.delta = delta
 
     
-    def _get_topk_indices( self, scores: torch.Tensor ):
+    def _get_topk_indices( self, score: torch.Tensor ):
 
-        topk_score_indices = torch.topk(scores, self.topk, dim=-1).indices
+        topk_score_indices = torch.topk(score, self.topk, dim=-1).indices
 
         return topk_score_indices
 
@@ -221,9 +222,9 @@ class TopkLogitsProcessor(LogitsProcessor):
 
         for b_idx , score in enumerate(scores):
 
-            topk_score_indices = self._get_topk_indices(scores[b_idx])
+            topk_score_indices = self._get_topk_indices(score)
 
-            scores[topk_score_indices] += self.delta
+            scores[b_idx][topk_score_indices] += self.delta
 
         return scores
     
