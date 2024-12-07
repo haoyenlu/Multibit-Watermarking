@@ -85,17 +85,15 @@ def main(args):
 
 
     c4 = load_dataset("allenai/c4", "en", split='train',streaming=True)
+    c4_iter = iter(c4)
 
     cnt = 100
 
-    for prompt in c4:
-        if cnt == 0: break
-        print(f"Test Sample:{-cnt + 100 + 1}")
-        cnt -= 1
+    for _ in range(cnt):
+        print(f"Test Sample:{_+ 1}")
         
-
         
-        input_text = prompt['text']
+        input_text = next(c4_iter)['text']
         tokenized_input = tokenizer(input_text, return_tensors='pt').to(model.device)
         tokenized_input = utils.truncate(tokenized_input, max_length=300).to(model.device)
 

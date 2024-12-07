@@ -212,6 +212,13 @@ class TopkLogitsProcessor(LogitsProcessor):
         self.delta = delta
 
     
+    def _cal_topk_mask(self,score , indices):
+        mask = torch.zeros_like(score,dtype=torch.bool)
+        for idx in indices:
+            mask[idx] = True
+        
+        return mask
+
     def _get_topk_indices( self, scores: torch.Tensor ):
 
         topk_score_indices = torch.topk(scores, self.topk, dim=-1).indices
@@ -223,8 +230,10 @@ class TopkLogitsProcessor(LogitsProcessor):
         for b_idx , score in enumerate(scores):
 
             topk_score_indices = self._get_topk_indices(score)
+            topk_mask = self._cal_topk_mask(score, topk_score_indices)
 
-            scores[b_idx][topk_score_indices] += self.delta
+            scores[b_idx][topk_mask] += self.delta
+            scores[b_idx][~topk_mask] -= self.deta
 
         return scores
     
