@@ -6,6 +6,7 @@ from transformers import (
     MinLengthLogitsProcessor,
     GPT2LMHeadModel,
     GPT2TokenizerFast,
+    MinPLogitsWarper
 )
 
 from tqdm import tqdm
@@ -66,7 +67,9 @@ def main(args):
 
     repetition_processor = RepetitionPenaltyLogitsProcessor(penalty=1.5)
 
-    topk_processor = TopkLogitsProcessor(top_k=args.topk,filter_value=args.topk_delta)
+    topK_processor = TopkLogitsProcessor(top_k=args.topk,filter_value=args.topk_delta,min_tokens_to_keep=1000)
+
+    minP_processor = MinPLogitsWarper(min_p = 0.25,filter_value = args.topk_delta,min_token_to_keep=1000)
 
     mb_watermark_detector = MultibitWatermarkDetector(
         vocab=list(tokenizer.get_vocab().values()),
@@ -107,7 +110,8 @@ def main(args):
                                 logits_processor=LogitsProcessorList([
                                     min_length_processor, 
                                     repetition_processor, 
-                                    topk_processor,
+                                    # topK_processor,
+                                    minP_processor,
                                     mb_watermark_processor,
 
         ]))
