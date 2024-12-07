@@ -414,128 +414,7 @@ class MultibitWatermarkDetector(WatermarkBase):
                 torch.tensor(offsets),
                 )
 
-    def _score_windows_impl_batched(
-        self,
-        input_ids: torch.Tensor,
-        window_size: str,
-        window_stride: int = 1,
-    ):
-        # Implementation details:
-        # 1) --ignore_repeated_ngrams is applied globally, and windowing is then applied over the reduced binary vector
-        #      this is only one way of doing it, another would be to ignore bigrams within each window (maybe harder to parallelize that)
-        # 2) These windows on the binary vector of green/red hits, independent of context_width, in contrast to Kezhi's first implementation
-        # 3) z-scores from this implementation cannot be directly converted to p-values, and should only be used as labels for a
-        #    ROC chart that calibrates to a chosen FPR. Due, to windowing, the multiple hypotheses will increase scores across the board#
-        #    naive_count_correction=True is a partial remedy to this
 
-        ngram_to_watermark_lookup, frequencies_table = self._score_ngrams_in_passage(input_ids)
-        green_mask, green_ids, offsets = self._get_green_at_T_booleans(
-            input_ids, ngram_to_watermark_lookup
-        )
-        len_full_context = len(green_ids)
-
-        partial_sum_id_table = torch.cumsum(green_ids, dim=0)
-
-        if window_size == "max":
-            # could start later, small window sizes cannot generate enough power
-            # more principled: solve (T * Spike_Entropy - g * T) / sqrt(T * g * (1 - g)) = z_thresh for T
-            sizes = range(1, len_full_context)
-        else:
-            sizes = [int(x) for x in window_size.split(",") if len(x) > 0]
-
-        z_score_max_per_window = torch.zeros(len(sizes))
-        cumulative_eff_z_score = torch.zeros(len_full_context)
-        s = window_stride
-
-        window_fits = False
-        for idx, size in enumerate(sizes):
-            if size <= len_full_context:
-                # Compute hits within window for all positions in parallel:
-                window_score = torch.zeros(len_full_context - size + 1, dtype=torch.long)
-                # Include 0-th window
-                window_score[0] = partial_sum_id_table[size - 1]
-                # All other windows from the 1st:
-                window_score[1:] = partial_sum_id_table[size::s] - partial_sum_id_table[:-size:s]
-
-                # Now compute batched z_scores
-                batched_z_score_enum = window_score - self.gamma * size
-                z_score_denom = sqrt(size * self.gamma * (1 - self.gamma))
-                batched_z_score = batched_z_score_enum / z_score_denom
-
-                # And find the maximal hit
-                maximal_z_score = batched_z_score.max()
-                z_score_max_per_window[idx] = maximal_z_score
-
-                z_score_at_effective_T = torch.cummax(batched_z_score, dim=0)[0]
-                cumulative_eff_z_score[size::s] = torch.maximum(
-                    cumulative_eff_z_score[size::s], z_score_at_effective_T[:-1]
-                )
-                window_fits = True  # successful computation for any window in sizes
-
-        if not window_fits:
-            raise ValueError(
-                f"Could not find a fitting window with window sizes {window_size} for (effective) context length {len_full_context}."
-            )
-
-        # Compute optimal window size and z-score
-        cumulative_z_score = cumulative_eff_z_score[offsets]
-        optimal_z, optimal_window_size_idx = z_score_max_per_window.max(dim=0)
-        optimal_window_size = sizes[optimal_window_size_idx]
-        return (
-            optimal_z,
-            optimal_window_size,
-            z_score_max_per_window,
-            cumulative_z_score,
-            green_mask,
-        )
-
-    def _score_sequence_window(
-        self,
-        input_ids: torch.Tensor,
-        return_num_tokens_scored: bool = True,
-        return_num_green_tokens: bool = True,
-        return_green_fraction: bool = True,
-        return_green_token_mask: bool = False,
-        return_z_score: bool = True,
-        return_z_at_T: bool = True,
-        return_p_value: bool = True,
-        window_size: str = None,
-        window_stride: int = 1,
-    ):
-        (
-            optimal_z,
-            optimal_window_size,
-            _,
-            z_score_at_T,
-            green_mask,
-        ) = self._score_windows_impl_batched(input_ids, window_size, window_stride)
-
-        # HF-style output dictionary
-        score_dict = dict()
-        if return_num_tokens_scored:
-            score_dict.update(dict(num_tokens_scored=optimal_window_size))
-
-        denom = sqrt(optimal_window_size * self.gamma * (1 - self.gamma))
-        green_token_count = int(optimal_z * denom + self.gamma * optimal_window_size)
-        green_fraction = green_token_count / optimal_window_size
-        if return_num_green_tokens:
-            score_dict.update(dict(num_green_tokens=green_token_count))
-        if return_green_fraction:
-            score_dict.update(dict(green_fraction=green_fraction))
-        if return_z_score:
-            score_dict.update(dict(z_score=optimal_z))
-        if return_z_at_T:
-            score_dict.update(dict(z_score_at_T=z_score_at_T))
-        if return_p_value:
-            z_score = score_dict.get("z_score", optimal_z)
-            score_dict.update(dict(p_value=self._compute_p_value(z_score)))
-
-        # Return per-token results for mask. This is still the same, just scored by windows
-        # todo would be to mark the actually counted tokens differently
-        if return_green_token_mask:
-            score_dict.update(dict(green_token_mask=green_mask.tolist()))
-
-        return score_dict
 
     def _compute_ber(self, pred_msg: list, message: str):
         pred_msg = "".join(map(str, pred_msg))
@@ -597,19 +476,8 @@ class MultibitWatermarkDetector(WatermarkBase):
         # call score method
         output_dict = {}
 
-        # Using Window Detection
-        if window_size is not None:
-            # assert window_size <= len(tokenized_text) cannot assert for all new types
-            score_dict = self._score_sequence_window(
-                tokenized_text,
-                window_size=window_size,
-                window_stride=window_stride,
-                **kwargs,
-            )
-            output_dict.update(score_dict)
-        else:
-            kwargs['text'] = text
-            score_dict = self._score_sequence(tokenized_text, **kwargs)
+        kwargs['text'] = text
+        score_dict = self._score_sequence(tokenized_text, **kwargs)
 
         if return_scores:
             output_dict.update(score_dict)
@@ -617,8 +485,7 @@ class MultibitWatermarkDetector(WatermarkBase):
             gold_position = kwargs['position'][self.context_width - self.self_salt:]
             position = score_dict['sampled_positions']
             match_cnt = sum([x == y for x, y in zip(gold_position, position)])
-            output_dict['position_acc'] = match_cnt / len(position)
-            # output_dict.update(dict(position_acc=match_cnt / len(position)))
+            output_dict.update(dict(position_acc=match_cnt / len(position)))
 
         # if passed return_prediction then perform the hypothesis test and return the outcome
         if return_prediction:

@@ -92,7 +92,7 @@ def main():
         prefix_and_output_text = tokenizer.decode(output_tokens[0], skip_special_tokens=True)
         print(prefix_and_output_text)
 
-        score_dict = mb_watermark_detector.detect(output_text, return_scores=False)
+        score_dict = mb_watermark_detector.detect(output_text, return_scores=True)
         print(score_dict)
 
         _dict.append(score_dict)
