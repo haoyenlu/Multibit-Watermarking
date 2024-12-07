@@ -99,8 +99,6 @@ class MultibitWatermarkDetector(WatermarkBase):
         ngram_to_watermark_lookup, frequencies_table, ngram_to_position_lookup, green_cnt_by_position, \
             position_list = self._score_ngrams_in_passage_sequential(input_ids)
 
-        # print(green_cnt_by_position)
-
 
         # count positions for all tokens
         position_cnt = {}

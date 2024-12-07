@@ -74,7 +74,6 @@ def main():
         message_decimal = random.getrandbits(message_length)
 
         message_binary = format(message_decimal,f"0{message_length}b")
-        print("Message:",message_binary)
 
         mb_watermark_processor.set_message(message_binary)
         mb_watermark_detector.set_message(message_binary)
@@ -90,8 +89,7 @@ def main():
         output_text = tokenizer.decode(output_tokens[0][tokenized_input['input_ids'].shape[-1]:], skip_special_tokens=True) # 生成的文本
 
         prefix_and_output_text = tokenizer.decode(output_tokens[0], skip_special_tokens=True)
-        print(prefix_and_output_text)
-
+        
         score_dict = mb_watermark_detector.detect(output_text, return_scores=True)
         print(score_dict)
 
