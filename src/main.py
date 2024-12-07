@@ -81,12 +81,13 @@ def main(args):
 
 
 
-    c4 = load_dataset("allenai/c4", "en", split='validation',streaming=True)
+    c4 = load_dataset("allenai/c4", "en", split='train',streaming=True)
 
-    cnt = 0
+    cnt = 100
+
     for prompt in c4:
-        print(f"Test Sample:{cnt + 1}")
-        cnt += 1
+        print(f"Test Sample:{-cnt + 100 + 1}")
+        cnt -= 1
 
         
         input_text = prompt['text']
