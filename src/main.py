@@ -102,7 +102,7 @@ def main(args):
         
 
         """With TopK Logit Processor"""
-        output_tokens_with_topK = model.generate(**tokenized_input, max_new_tokens=args.max_new_token, num_beams=2,
+        output_tokens_with_topK = model.generate(**tokenized_input, max_new_tokens=args.max_new_token, num_beams=args.beans,
                                 logits_processor=LogitsProcessorList([
                                     min_length_processor, 
                                     repetition_processor, 
@@ -128,7 +128,7 @@ def main(args):
         print(f"Accuracy:{score_dict_with_topk['bit_acc']}")
 
         """Without TopK Logit Processor"""
-        output_tokens_without_topK = model.generate(**tokenized_input, max_new_tokens=args.max_new_token, num_beams=2,
+        output_tokens_without_topK = model.generate(**tokenized_input, max_new_tokens=args.max_new_token, num_beams=args.beans,
                                 logits_processor=LogitsProcessorList([
                                     min_length_processor, 
                                     repetition_processor, 
@@ -167,6 +167,7 @@ if __name__ == '__main__':
     parser.add_argument('--base',type=int,default=2)
     parser.add_argument('--iter',type=int,default=100)
     parser.add_argument('--max_new_token',type=int,default=200)
+    parser.add_argument('--beans',type=int,default=2)
 
     args = parser.parse_args()
 
