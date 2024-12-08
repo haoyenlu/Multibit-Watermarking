@@ -106,10 +106,10 @@ def main(args):
                                 logits_processor=LogitsProcessorList([
                                     min_length_processor, 
                                     repetition_processor, 
-
+                                    topK_processor,
                                     # minP_processor,
                                     mb_watermark_processor,
-                                    topK_processor,
+
 
         ]))
 
