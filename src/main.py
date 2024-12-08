@@ -69,8 +69,6 @@ def main(args):
 
     topK_processor = TopkLogitsProcessor(topk=args.topk,delta=args.topk_delta)
 
-    minP_processor = MinPLogitsWarper(min_p = 0.25,filter_value = args.topk_delta,min_tokens_to_keep=1000)
-
     mb_watermark_detector = MultibitWatermarkDetector(
         vocab=list(tokenizer.get_vocab().values()),
         gamma=args.gamma,
@@ -87,9 +85,7 @@ def main(args):
     c4 = load_dataset("allenai/c4", "en", split='train',streaming=True)
     c4_iter = iter(c4)
 
-    cnt = 100
-
-    for _ in range(cnt):
+    for _ in range(args.iter):
         print(f"Test Sample:{_+ 1}")
         
         
@@ -110,9 +106,10 @@ def main(args):
                                 logits_processor=LogitsProcessorList([
                                     min_length_processor, 
                                     repetition_processor, 
-                                    topK_processor,
+
                                     # minP_processor,
                                     mb_watermark_processor,
+                                    topK_processor,
 
         ]))
 
@@ -168,7 +165,8 @@ if __name__ == '__main__':
     parser.add_argument('--topk_delta',type=float,default=1.0)
     parser.add_argument('--gamma',type=float,default=0.25)
     parser.add_argument('--base',type=int,default=2)
-
+    parser.add_argument('--iter',type=int,default=100)
+    parser.add_argument('--max_new_token',type=int,default=200)
 
     args = parser.parse_args()
 
