@@ -102,7 +102,7 @@ def main(args):
         
 
         """With TopK Logit Processor"""
-        output_tokens_with_topK = model.generate(**tokenized_input, max_new_tokens=200, num_beams=2,
+        output_tokens_with_topK = model.generate(**tokenized_input, max_new_tokens=args.max_new_token, num_beams=2,
                                 logits_processor=LogitsProcessorList([
                                     min_length_processor, 
                                     repetition_processor, 
@@ -128,7 +128,7 @@ def main(args):
         print(f"Accuracy:{score_dict_with_topk['bit_acc']}")
 
         """Without TopK Logit Processor"""
-        output_tokens_without_topK = model.generate(**tokenized_input, max_new_tokens=200, num_beams=2,
+        output_tokens_without_topK = model.generate(**tokenized_input, max_new_tokens=args.max_new_token, num_beams=2,
                                 logits_processor=LogitsProcessorList([
                                     min_length_processor, 
                                     repetition_processor, 
