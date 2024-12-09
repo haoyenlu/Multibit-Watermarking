@@ -9,9 +9,6 @@ from transformers import (
     MinPLogitsWarper
 )
 
-from tqdm import tqdm
-
-
 
 from datasets import load_dataset
 
@@ -46,7 +43,7 @@ without_topk_perplexity = []
 
 
 def main(args):
-
+    """Analyze Perplexity and Bit Accuracy with and without Topk Logit Processor"""
 
     mb_watermark_processor = MultibitWatermarkLogitsProcessor(
         vocab=list(tokenizer.get_vocab().values()),
@@ -154,6 +151,9 @@ def main(args):
 
     print(f"Average Perplexity without TopK:{sum(without_topk_perplexity)/len(without_topk_perplexity)}")
     print(f"Average Accuracy without Topk:{sum(without_topk_accuracy)/len(without_topk_accuracy)}")
+
+
+
 
 
 if __name__ == '__main__':

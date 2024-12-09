@@ -237,6 +237,7 @@ class MultibitWatermarkDetector(WatermarkBase):
         """
         if T <= 0:
             return 0
+        
         expected_count = self.gamma
         numer = observed_count - expected_count * T
         denom = math.sqrt(T * expected_count * (1 - expected_count))
@@ -256,7 +257,7 @@ class MultibitWatermarkDetector(WatermarkBase):
         p_val = 1 - binom.cdf(max(observed_count, 0), T, binom_p)
         return p_val
 
-    def _compute_max_multinomial_p_val(self, observed_count, T):
+    def _compute_max_multinomial_p_val(self, observed_count, T , epsilon = 1e-5):
         """
         Compute the p-value by subtracting the cdf(observed_count -1) of multinomial~(T, 1/base, ... 1/base),
         which is the probability of observing a sample as extreme or more as the observed_count
@@ -272,7 +273,7 @@ class MultibitWatermarkDetector(WatermarkBase):
         a = observed_count - 1
         poiss_cdf_X = poiss.cdf(a, T / k)
         normal_approx_W = normal.cdf(0.5 / np.sqrt(T)) - normal.cdf(-0.5 / np.sqrt(T))
-        log_max_multi_cdf = math.log(np.sqrt(2 * math.pi * T)) + k * math.log(poiss_cdf_X) + math.log(normal_approx_W)
+        log_max_multi_cdf = math.log(np.sqrt(2 * math.pi * T) + epsilon) + k * math.log(poiss_cdf_X + epsilon) + math.log(normal_approx_W + epsilon)
         max_multi_cdf = math.exp(log_max_multi_cdf)
         p_val = 1 - min(1, max_multi_cdf)
         return p_val

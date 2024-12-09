@@ -44,7 +44,8 @@ class WatermarkBase:
         self.message = None
         self.bit_position = None
         self.base = base
-        # self.chunk = int(ceil(log2(base)))
+
+
         assert math.floor(1 / self.gamma) >= base, f"Only {math.floor(1 / self.gamma)} chunks available " \
                                               f"with current gamma={self.gamma}," \
                                               f"But base is {self.base}"
@@ -95,7 +96,6 @@ class WatermarkBase:
         return colorlist
 
 
-    # @lru_cache(maxsize=2**32)
     def _get_ngram_score_cached(self, prefix: tuple[int], target: int, cand_msg=None):
         colorlist_ids = self._get_colorlist_ids(torch.as_tensor(prefix, device=self.device))
         colorlist_flag = []
@@ -157,17 +157,9 @@ class MultibitWatermarkLogitsProcessor(WatermarkBase, LogitsProcessor):
         
         for b_idx, input_seq in enumerate(input_ids):
             
-            # select topk indices
-            # topk_score_indices = set(self._get_topk_indices(scores[b_idx]))
-
-            # colorlist_ids = self._get_colorlist_ids(input_seq, self.top_k)
             colorlist_ids = self._get_colorlist_ids(input_seq)
 
-            # Select the colorlist based on the current position message
             greenlist = colorlist_ids[self.get_current_bit()]
-
-            # # Select token ids in both topk list and greenlist
-            # topk_greenlist = list(greenlist ^ topk_score_indices)
 
             scores[b_idx][greenlist] += self.delta
 
