@@ -21,6 +21,8 @@ class WatermarkBase:
         message_length: int = 4,
         code_length: int = 4,
         device: str = "cuda",
+        context_width: int = 1,
+        hash_key: int = 15485863,
         **kwargs
     ):
         self.device = device
@@ -30,7 +32,9 @@ class WatermarkBase:
         self.gamma = gamma
         self.delta = delta
         self.rng = None
-        self._initialize_seeding_scheme()
+
+        self.context_width = context_width
+        self.hash_key = hash_key
 
 
         ### Parameters for multi-bit watermarking ###
@@ -55,13 +59,6 @@ class WatermarkBase:
         self.position_increment = 0
         self.green_cnt_by_position = {i: [0 for _ in range(self.base)] for i
                                       in range(1, self.converted_msg_length + 1)}
-
-    def _initialize_seeding_scheme(self) -> None:
-        """Initialize all internal settings of the seeding strategy from a colloquial, "public" name for the scheme."""
-        self.prf_type = "additive_prf"
-        self.context_width = 1
-        self.self_salt = False
-        self.hash_key = 15485863
 
     def _seed_rng(self, input_ids: torch.LongTensor) -> None:
         """Seed RNG from local context. Not batched, because the generators we use (like cuda.random) are not batched."""

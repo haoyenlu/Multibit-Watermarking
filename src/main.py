@@ -53,6 +53,8 @@ def main(args):
         select_green_tokens=True,
         message_length=args.message_length,
         device=model.device,
+        context_width = args.context_width,
+        hash_key=args.hash_key
     )
 
     
@@ -75,6 +77,8 @@ def main(args):
         ignore_repeated_ngrams=False,
         message_length=args.message_length,
         base=args.base,
+        context_width = args.context_width,
+        hash_key=args.hash_key
     )
 
 
@@ -87,8 +91,7 @@ def main(args):
         
         
         input_text = next(c4_iter)['text']
-        tokenized_input = tokenizer(input_text, return_tensors='pt').to(model.device)
-        tokenized_input = utils.truncate(tokenized_input, max_length=300).to(model.device)
+
 
         message_decimal = random.getrandbits(args.message_length)
 
@@ -99,6 +102,8 @@ def main(args):
         
 
         """With TopK Logit Processor"""
+        tokenized_input = tokenizer(input_text, return_tensors='pt').to(model.device)
+        tokenized_input = utils.truncate(tokenized_input, max_length=300).to(model.device)
         output_tokens_with_topK = model.generate(**tokenized_input, max_new_tokens=args.max_new_token, num_beams=args.beans,
                                 logits_processor=LogitsProcessorList([
                                     min_length_processor, 
@@ -133,7 +138,7 @@ def main(args):
         ]))
 
 
-        output_text_without_topk = tokenizer.decode(output_tokens_without_topK[0][tokenized_input['input_ids'].shape[-1]:], skip_special_tokens=True) # 生成的文本
+        output_text_without_topk = tokenizer.decode(output_tokens_without_topK[0][tokenized_input['input_ids'].shape[-1]:], skip_special_tokens=True)
 
         score_dict_without_topk = mb_watermark_detector.detect(output_text_without_topk, return_scores=True)
         
@@ -168,6 +173,8 @@ if __name__ == '__main__':
     parser.add_argument('--iter',type=int,default=100)
     parser.add_argument('--max_new_token',type=int,default=200)
     parser.add_argument('--beans',type=int,default=2)
+    parser.add_argument('--context_width',type=int,default=1)
+    parser.add_argument('--hash_key',type=int,)
 
     args = parser.parse_args()
 
