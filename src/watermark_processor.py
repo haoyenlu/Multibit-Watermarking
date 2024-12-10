@@ -23,6 +23,7 @@ class WatermarkBase:
         device: str = "cuda",
         context_width: int = 1,
         hash_key: int = 15485863,
+        self_salt: bool = False,
         **kwargs
     ):
         self.device = device
@@ -35,6 +36,7 @@ class WatermarkBase:
 
         self.context_width = context_width
         self.hash_key = hash_key
+        self.self_salt = self_salt
 
 
         ### Parameters for multi-bit watermarking ###
