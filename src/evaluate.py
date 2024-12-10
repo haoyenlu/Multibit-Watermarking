@@ -69,7 +69,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--BASE_MODEL',type=str,default="facebook/opt-1.3b")
-    parser.add_argument('--EVAL_MODEL',type=str,default='gpt2-medium')
+    parser.add_argument('--EVAL_MODEL',type=str,default='openai-community/gpt2-medium')
     parser.add_argument('--message_length',type=int,default=4)
     parser.add_argument('--mb_delta',type=float,default=2.0)
     parser.add_argument('--topk',type=int,default=1000)
