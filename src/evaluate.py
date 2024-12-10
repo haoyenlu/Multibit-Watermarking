@@ -29,6 +29,7 @@ def main(args):
     for _ in range(args["iter"]):
         print(f"Test Sample:{ _ + 1}")
         
+        print(args["EVAL_MODEL"])
         
         input_text = next(c4_iter)['text']
 
