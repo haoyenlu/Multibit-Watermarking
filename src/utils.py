@@ -27,8 +27,8 @@ def truncate(d, max_length=200):
 
 def compute_perplexity(text, eval_model = 'gpt2-medium', device = 'cpu'):
 
-    eval_model = GPT2LMHeadModel.from_pretrained(eval_model,device_map=device)
-    eval_tokenizer = GPT2TokenizerFast.from_pretrained(eval_model)
+    eval_model = AutoModelForCausalLM.from_pretrained(eval_model,device_map=device)
+    eval_tokenizer = AutoTokenizer.from_pretrained(eval_model)
     eval_model.eval()
 
     eval_model.eval()
